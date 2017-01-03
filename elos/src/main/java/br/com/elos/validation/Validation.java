@@ -2,28 +2,31 @@ package br.com.elos.validation;
 
 import br.com.elos.helpers.Parse;
 import br.com.elos.helpers.Util;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Validation {
-    private final List<String[]> arrValues   = new ArrayList<>();
-    private final List<String[]> arrErrors   = new ArrayList<>();
     
-    private final List<Object[]> rules     = new ArrayList<>();
-    private final int            prField   = 0;
-    private final int            prValue   = 1;
-    private final int            prRule    = 2;
-    private final int            prMessage = 3;
+    private final Map<String,Object[]> rules = new HashMap<>();
+    private final Map<String,String> errors = new HashMap<>();
+    private final int prValue   = 0;
+    private final int prRule    = 1;
+    private final int prMessage = 2;
     
     /**
      * método responsável pela validação do valor inteiro válido.
      * @param value parâmetro string para análise.
      * @return retorna 'true' se valor é um inteiro válido ou 'false' para valor inválido.
      */
-    public boolean isInteger(String value) {
-        return (new Parse().toInt(value) != null);
+    public boolean isInteger(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return (new Parse().toInt(value.toString()) != null);
     }
     
     /**
@@ -31,8 +34,12 @@ public class Validation {
      * @param value parâmetro string para análise.
      * @return retorna 'true' se valor é um decimal válido ou 'false' para valor inválido.
      */
-    public boolean isFloat(String value) {
-        return (new Parse().toFloat(value) != null);
+    public boolean isFloat(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return (new Parse().toFloat(value.toString()) != null);
     }
     
     /**
@@ -40,8 +47,12 @@ public class Validation {
      * @param value parâmetro string no formato 'dd/MM/yyyy'.
      * @return retorna 'true' se valor é uma data válida ou 'false' para valor inválido.
      */
-    public boolean isDate(String value) {
-        return (new Parse().toDate(value, "dd/MM/yyyy") != null);
+    public boolean isDate(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return (new Parse().toDate(value.toString(), "dd/MM/yyyy") != null);
     }
 
     /**
@@ -49,8 +60,12 @@ public class Validation {
      * @param value parâmetro string no formato 'HH:mm:ss'.
      * @return retorna 'true' se valor é uma hora válida ou 'false' para valor inválido.
      */    
-    public boolean isTime(String value) {
-        return (new Parse().toDate(value, "HH:mm:ss") != null);
+    public boolean isTime(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return (new Parse().toDate(value.toString(), "HH:mm:ss") != null);
     }
 
     /**
@@ -58,8 +73,12 @@ public class Validation {
      * @param value parâmetro string no formato 'dd/MM/yyyy HH:mm:ss'.
      * @return retorna 'true' se valor é uma data/hora válida ou 'false' para valor inválido.
      */    
-    public boolean isDateTime(String value) {
-        return (new Parse().toDate(value, "dd/MM/yyyy HH:mm:ss") != null);
+    public boolean isDateTime(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return (new Parse().toDate(value.toString(), "dd/MM/yyyy HH:mm:ss") != null);
     }
    
     /**
@@ -68,8 +87,12 @@ public class Validation {
      * @param min quantidade mínima exigida.
      * @return retorna 'true' se valor atingiu o mínimo desejado ou 'false' para um valor inferior.
      */
-    public boolean isMinLength(String value, Integer min) {
-        return value.length() >= min;
+    public boolean isMinLength(Object value, Integer min) {
+        if (value == null) {
+            return false;
+        }
+        
+        return value.toString().length() >= min;
     }
     
     /**
@@ -78,8 +101,12 @@ public class Validation {
      * @param max quantidade máxima exigida.
      * @return retorna 'true' se valor é menor ou igual ao máximo exigido ou 'false' para um valor superior.
      */
-    public boolean isMaxLength(String value, Integer max) {
-        return value.length() <= max;
+    public boolean isMaxLength(Object value, Integer max) {
+        if (value == null) {
+            return false;
+        }
+        
+        return value.toString().length() <= max;
     }
     
     /**
@@ -87,8 +114,12 @@ public class Validation {
      * @param value parâmetro string para análise.
      * @return retorna 'true' se valor foi preenchido ou 'false' para valor nulo.
      */
-    public boolean isRequired(String value) {
-        return new Util().trim(value).length() > 0;
+    public boolean isRequired(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
+        return new Util().trim(value.toString()).length() > 0;
     }
     
     /**
@@ -96,9 +127,9 @@ public class Validation {
      * @param value parâmetro e-mail para análise.
      * @return retorna 'true' se e-mail é válido ou 'false' para e-mail inválido.
      */
-    public boolean isEmail(String value) {
+    public boolean isEmail(Object value) {
         Pattern p = Pattern.compile("^[\\w-]+(\\.[\\w-]+)*@([\\w-]+\\.)+[a-zA-Z]{2,7}$"); 
-        Matcher m = p.matcher(value); 
+        Matcher m = p.matcher(value.toString()); 
         
         if (m.find()){
             return true;
@@ -112,26 +143,24 @@ public class Validation {
      */
     public void clear() {
         this.rules.clear();
-        this.arrValues.clear();
-        this.arrErrors.clear();
-    }
-    
-    public void add(String field, Object value, List<Rules> rules, String message) {
-        Object newRule[] = {field, value, rules, message};
-        this.rules.add(newRule);
+        this.errors.clear();
     }
     
     /**
-     * método responsável por adicionar valores para validação.
+     * método responsável por adicionar rules para validação.
      * @param field nome do campo responsável pelo valor informado.
-     * @param label valor presente no campo responsável.
-     * @param rule regras para validação <strong>integer</strong>, <strong>float</strong>, <strong>date</strong>, <strong>time</strong>,<strong>datetime</strong>, <strong>minlength[0]</strong>, <strong>maxlength[0]</strong>, <strong>required</strong>, <strong>email</strong>
+     * @param value valor presente no campo responsável.
+     * @param rules regras para validação.
      * @param message mensagem padrão caso validação seja inválida.
-     * <br><br><strong>Exemplo: </strong> add('nome', 'Nome do usuário', 'required;minlength[3];maxlength[150]', 'Informe o nome do usuário');
      */
-    public void add(String field, String label, String rule, String message) {
-        String valueAdd[] = {field, label, rule, message};
-        this.arrValues.add(valueAdd);
+    public void add(String field, Object value, List<Rules> rules, String message) {
+        Object newRule[] = {value, rules, message};
+        this.rules.put(field, newRule);
+    }
+    
+    public void add(String field, Object value, List<Rules> rules) {
+        Object newRule[] = {value, rules, null};
+        this.rules.put(field, newRule);
     }
     
     /**
@@ -139,130 +168,114 @@ public class Validation {
      * @return retorna 'true' caso todos os field's são válidos ou 'false' caso tenha ocorrido o preenchimento inválido dos field's.
      */
     public boolean validate() {
-        //percorre todos os fields registrados no list
-        for (Object[] field : this.rules) {
-            //captura todas as regras existentes
-            List<Rules> typeRules = (List<Rules>) field[this.prRule];
-            
-            //valida regras
-            for(Rules type : typeRules) {
-                System.out.println(type);
-            }
-            
-            //valida regras
-            for (int i=0; i < arrRule.length; i++) {
-                String rule   = arrRule[i];
-                int    length = 0;
-                
-                //se houver parâmetro adicional, captura informações
-                if (rule.indexOf("[") > 0) {
-                    length = Integer.parseInt(rule.substring(rule.indexOf("[")+1, rule.indexOf("]")));
-                    rule   = arrRule[i].replace("[" + length + "]", "");
-                }
-                        
-                switch(rule) {
-                    case tpRequired : {
-                        if ((!this.isRequired(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrError[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrError);
-                        }
-                        break;
-                    }
-
-                    case tpInteger : {
-                        if ((!this.isInteger(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpFloat : {
-                        if ((!this.isFloat(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpDate : {
-                        if ((!this.isDate(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpTime : {
-                        if ((!this.isTime(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpDateTime : {
-                        if ((!this.isDateTime(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpMinLength : {
-                        if ((!this.isMinLength(arrValue[this.prLabel], length)) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpMaxLength : {
-                        if ((!this.isMaxLength(arrValue[this.prLabel], length)) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-
-                    case tpEmail : {
-                        if ((!this.isEmail(arrValue[this.prLabel])) && (!this.findError(arrValue[this.prField]))) {
-                            String arrErro[] = {arrValue[this.prField], arrValue[this.prMessage]};
-                            this.arrErrors.add(arrErro);
-                        }
-                        break;
-                    }
-                    default : break;
-                }
-            }
-            
-            System.out.println("Validade: field[" + arrValue[this.prField] + "] - label[" + arrValue[this.prLabel] + "] - rule[" + arrValue[this.prRule] + "] - message[" + arrValue[this.prMessage] + "]");
-        }*/
+        Object value = null;
+        String message = null;
         
-        return this.arrErrors.isEmpty();
+        //percorre todos os fields registrados no list
+        for (Map.Entry<String,Object[]> field : this.rules.entrySet()) {
+            //captura parâmetros
+            value = (Object) field.getValue()[this.prValue];
+            message = (String) field.getValue()[this.prMessage];
+            
+            //captura todas as regras existentes para validação
+            List<Rules> typeRules = (List<Rules>) field.getValue()[this.prRule];
+            
+            //valida regras
+            for(Rules rule : typeRules) {
+                switch (rule) {
+                    case REQUIRED : {
+                        if ((!this.isRequired(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case INTEGER : {
+                        if ((!this.isInteger(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case FLOAT : {
+                        if ((!this.isFloat(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case DATE : {
+                        if ((!this.isDate(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case TIME : {
+                        if ((!this.isTime(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case DATETIME : {
+                        if ((!this.isDateTime(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case MINLENGTH : {
+                        if ((!this.isMinLength(value, rule.getLength())) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case MAXLENGTH : {
+                        if ((!this.isMaxLength(value, rule.getLength())) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                    
+                    case EMAIL : {
+                        if ((!this.isEmail(value)) && (!this.isInvalid(field.getKey()))) {
+                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return this.errors.isEmpty();
     }
     
     /**
      * método responsável por retornar uma lista de erros de validação.
      * @return retorna erros encontrados após a chamada do método <strong>validate()</strong>.
      */
-    public List<String[]> getErrors() {
-        return arrErrors;
+    public Map<String,String> getErrors() {
+        return this.errors;
+    }
+    
+    /**
+     * método responsável por retornar a mensagem de erro
+     * @param field nome do campo a ser localizado na lista de erros.
+     * @return 
+     */
+    public Object findError(String field) {
+        return this.errors.get(field);
     }
     
     /**
      * método responsável pela localização de field's que originaram um erro após sua validação.
-     * @param field nome do field a ser localizado na lista de erros.
+     * @param field nome do campo a ser localizado na lista de erros.
      * @return retorna 'true' caso o field do erro seja localizado ou 'false' caso o field não seja localizado.
      */
-    public boolean findError(String field) {
-        for (String[] arrError : this.arrErrors) {
-            if (arrError[this.prField].contains(field)) {
-                return true;
-            }
-        }
-        
-        return false;
+    public boolean isInvalid(String field) {
+        return this.errors.containsKey(field);
     }
     
 }
