@@ -95,6 +95,10 @@ public class Util {
     }
     
     public String encrypt(String value) {
+        if (value == null) {
+            return null;
+        }
+        
         try {
             StringBuilder hash = new StringBuilder();
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");

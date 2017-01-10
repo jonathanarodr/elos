@@ -3,7 +3,6 @@ package br.com.elos.validation;
 import br.com.elos.helpers.Parse;
 import br.com.elos.helpers.Util;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,8 +11,8 @@ public class Validation {
     
     private final Map<String,Object[]> rules = new HashMap<>();
     private final Map<String,String> errors = new HashMap<>();
-    private final int prValue   = 0;
-    private final int prRule    = 1;
+    private final int prValue = 0;
+    private final int prRule = 1;
     private final int prMessage = 2;
     
     /**
@@ -153,12 +152,12 @@ public class Validation {
      * @param rules regras para validação.
      * @param message mensagem padrão caso validação seja inválida.
      */
-    public void add(String field, Object value, List<Rules> rules, String message) {
+    public void add(String field, Object value, String rules, String message) {
         Object newRule[] = {value, rules, message};
         this.rules.put(field, newRule);
     }
     
-    public void add(String field, Object value, List<Rules> rules) {
+    public void add(String field, Object value, String rules) {
         Object newRule[] = {value, rules, null};
         this.rules.put(field, newRule);
     }
@@ -178,70 +177,82 @@ public class Validation {
             message = (String) field.getValue()[this.prMessage];
             
             //captura todas as regras existentes para validação
-            List<Rules> typeRules = (List<Rules>) field.getValue()[this.prRule];
+            String rules[] = field.getValue()[this.prRule].toString().split(";");
             
             //valida regras
-            for(Rules rule : typeRules) {
-                switch (rule) {
+            for(String rule : rules) {                
+                //se houver parâmetro adicional para min ou max, captura informações
+                int length = 0;
+                if (rule.indexOf("[") > 0) {
+                    length = Integer.parseInt(rule.substring(rule.indexOf("[")+1, rule.indexOf("]")));
+                    rule   = rule.replace("[" + length + "]", "");
+                }
+                
+                //configura enum
+                Rules ruleEnum = Rules.valueOf(rule.toUpperCase());
+                ruleEnum.setLength(length);
+                ruleEnum.setMessage(message);
+                
+                switch (ruleEnum) {
                     case REQUIRED : {
-                        if ((!this.isRequired(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isRequired(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case INTEGER : {
-                        if ((!this.isInteger(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isInteger(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case FLOAT : {
-                        if ((!this.isFloat(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isFloat(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case DATE : {
-                        if ((!this.isDate(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isDate(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case TIME : {
-                        if ((!this.isTime(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isTime(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case DATETIME : {
-                        if ((!this.isDateTime(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isDateTime(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case MINLENGTH : {
-                        if ((!this.isMinLength(value, rule.getLength())) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isMinLength(value, rule.length())) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case MAXLENGTH : {
-                        if ((!this.isMaxLength(value, rule.getLength())) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isMaxLength(value, rule.length())) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case EMAIL : {
-                        if ((!this.isEmail(value)) && (!this.isInvalid(field.getKey()))) {
-                            this.errors.put(field.getKey(), (message != null) ? message : rule.getMessage());
+                        if ((!this.isEmail(value)) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
@@ -274,7 +285,7 @@ public class Validation {
      * @param field nome do campo a ser localizado na lista de erros.
      * @return retorna 'true' caso o field do erro seja localizado ou 'false' caso o field não seja localizado.
      */
-    public boolean isInvalid(String field) {
+    public boolean isError(String field) {
         return this.errors.containsKey(field);
     }
     

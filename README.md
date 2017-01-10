@@ -34,10 +34,8 @@ Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se 
 Depois de instalar o Elos, você deve configurar o arquivo `App.java` de acordo com as insturções abaixo:
 
 ## <a name="Elos"></a>Utilizando Elos
-Elos possui  
-
 ### <a name="Logging"></a>Logging
-O package Logging é 
+O Logging é um conjunto de blibliotecas
 
 ### <a name="Helpers"></a>Helpers
 
