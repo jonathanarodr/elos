@@ -19,6 +19,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.Transient;
 
@@ -76,7 +78,9 @@ public class MySQL {
     }
 
     private boolean isEntityMap(Field entity) {
-        return (entity.isAnnotationPresent(ManyToOne.class))
+        return (entity.isAnnotationPresent(OneToOne.class))
+            || (entity.isAnnotationPresent(OneToMany.class))
+            || (entity.isAnnotationPresent(ManyToOne.class))
             || (entity.isAnnotationPresent(ManyToMany.class));
     }
 
@@ -153,6 +157,10 @@ public class MySQL {
     }
 
     private void populateField(Object entity, Field field) throws IllegalArgumentException, IllegalAccessException, SQLException {
+        if (field.isAnnotationPresent(Transient.class)) {
+            return;
+        }
+        
         this.column = null;
         this.value = null;
         
@@ -457,6 +465,7 @@ public class MySQL {
                     this.extractField(this.entity, field);
 
                     if (this.isEntityMap(field)) {
+                        System.out.println(field.getType());
                         this.entityMap = field.getType().newInstance();
 
                         if ((this.entityMap.getClass().isAnnotationPresent(Entity.class))) {

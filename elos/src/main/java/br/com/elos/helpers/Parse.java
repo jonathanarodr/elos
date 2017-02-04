@@ -1,6 +1,3 @@
-/**
- * Classe utilizada para conversão de valores
- */
 package br.com.elos.helpers;
 
 import java.text.ParseException;
@@ -96,6 +93,14 @@ public class Parse {
         }
 
         return dateStr;
+    }
+    
+    public static <T> T cast(Object object, Class<T> className) {
+        try {
+            return className.cast(object);
+        } catch(ClassCastException ex) {
+            return null;
+        }
     }
    
 }

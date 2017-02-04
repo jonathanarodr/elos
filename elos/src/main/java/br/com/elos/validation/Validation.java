@@ -127,6 +127,10 @@ public class Validation {
      * @return retorna 'true' se e-mail é válido ou 'false' para e-mail inválido.
      */
     public boolean isEmail(Object value) {
+        if (value == null) {
+            return false;
+        }
+        
         Pattern p = Pattern.compile("^[\\w-]+(\\.[\\w-]+)*@([\\w-]+\\.)+[a-zA-Z]{2,7}$"); 
         Matcher m = p.matcher(value.toString()); 
         
@@ -237,14 +241,14 @@ public class Validation {
                     }
                     
                     case MINLENGTH : {
-                        if ((!this.isMinLength(value, rule.length())) && (!this.isError(field.getKey()))) {
+                        if ((!this.isMinLength(value, ruleEnum.length())) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case MAXLENGTH : {
-                        if ((!this.isMaxLength(value, rule.length())) && (!this.isError(field.getKey()))) {
+                        if ((!this.isMaxLength(value, ruleEnum.length())) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;

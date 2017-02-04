@@ -1,6 +1,3 @@
-/**
- * Classe utilizada para métodos utilitários
- */
 package br.com.elos.helpers;
 
 import java.io.UnsupportedEncodingException;

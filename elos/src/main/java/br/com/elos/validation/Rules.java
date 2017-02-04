@@ -12,21 +12,9 @@ public enum Rules {
     EMAIL;
     
     private int length;
-    
-    Rules() {
-        this.length = 0;
-    }
+    private String message;
 
-    public int getLength() {
-        return length;
-    }
-
-    public Rules setLength(int length) {
-        this.length = length;
-        return this;
-    }
-    
-    public String getMessage() {
+    private String messageDef() {
         switch (this) {
             case REQUIRED : return "Este campo é requerido";
             case INTEGER : return "Número inteiro inválido";
@@ -36,8 +24,33 @@ public enum Rules {
             case DATETIME : return "Data inválida, informe algo como 00/00/0000 00:00:00";
             case MINLENGTH : return "Informe no mínimo " + this.length + " caracteres";
             case MAXLENGTH : return "Informe no máximo " + this.length + " caracteres";
-            case EMAIL : return "E-mail inválido, informe algo como exemplo@elos.com.br";
+            case EMAIL : return "E-mail inválido, informe algo como exemplo@dominio.com.br";
             default : return null;
         }
     }
+    
+    public String message() {
+        if (this.message == null) {
+            return this.messageDef();
+        }
+        
+        return this.message;
+    }
+    
+    public void setMessage(String message) {
+        if (message == null) {
+            message = this.messageDef();
+        }
+        
+        this.message = message;
+    }
+    
+    public int length() {
+        return this.length;
+    }
+
+    public void setLength(int length) {
+        this.length = length;
+    }
+    
 }
