@@ -1,13 +1,11 @@
 package br.com.elos.route;
 
 import br.com.elos.App;
-import br.com.elos.helpers.Parse;
 import br.com.elos.serialization.Json;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +51,14 @@ public class Route extends HttpServlet {
                 mainpath = getServletContext().getContextPath() + controller.getAnnotation(Controller.class).value();
                 
                 //captura métodos da classe e verifica path
-                Set<Method> methods = reflections.getMethodsAnnotatedWith(Path.class);
+                //Set<Method> methods = reflections.getMethodsAnnotatedWith(Path.class);
+                Method[] methods = controller.getMethods();
                 
                 for (Method method : methods) {
+                    if (!method.isAnnotationPresent(Path.class)) {
+                        continue;
+                    }
+                    
                     path = this.pathBuilder(mainpath, method.getAnnotation(Path.class).value());
 
                     //valida request
@@ -69,31 +72,39 @@ public class Route extends HttpServlet {
 
                         //executa método
                         Object object = controller.newInstance();
-                        View response = (View) method.invoke(object, httpRequest, httpResponse);
+                        View response = (method.getParameterCount() > 0) ? (View) method.invoke(object, httpRequest, httpResponse) : (View) method.invoke(object);
                         
                         if (response == null) {
                             return;
                         }
                         
                         //efetua serialização da entidade caso exista
-                        if ((method.isAnnotationPresent(Produces.class)) && (response.entity != null)) {
+                        if (response.entity != null) {
                             httpResponse.setCharacterEncoding("utf-8");
                             
-                            switch (method.getAnnotation(Produces.class).value()[0]) {
-                                case MediaType.APPLICATION_FORM_URLENCODED:
-                                    httpResponse.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                                    httpRequest.setAttribute(response.entityname, response.entity);
-                                    break;
-                                case MediaType.APPLICATION_JSON: 
-                                    httpResponse.setContentType(MediaType.APPLICATION_JSON);
-                                    httpResponse.getWriter().write(new Json().build().toJson(response.entity));
-                                    break;
-                                default: throw new IllegalArgumentException("MediaType " + method.getAnnotation(Produces.class).value()[0] + " not configured");
+                            //se não houver definição de MediaType, configura padrão em json
+                            if (!method.isAnnotationPresent(Produces.class)) {
+                                httpResponse.setContentType(MediaType.APPLICATION_JSON);
+                                httpResponse.getWriter().write(new Json().build().toJson(response.entity));
+                                return;
+                            } else {
+                                switch (method.getAnnotation(Produces.class).value()[0]) {
+                                    case MediaType.APPLICATION_FORM_URLENCODED:
+                                        httpResponse.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                                        httpRequest.setAttribute("json", response.entity);
+                                        break;
+                                    case MediaType.APPLICATION_JSON: 
+                                        httpResponse.setContentType(MediaType.APPLICATION_JSON);
+                                        httpResponse.getWriter().write(new Json().build().toJson(response.entity));
+                                        return;
+                                    default: throw new IllegalArgumentException("MediaType " + method.getAnnotation(Produces.class).value()[0] + " not configured");
+                                }
                             }
                         }
                         
-                        if (method.getAnnotation(Produces.class).value()[0].equals(MediaType.APPLICATION_JSON)) {
-                            return;
+                        //registra session caso exista
+                        if (response.session != null) {
+                            httpRequest.getSession().setAttribute(response.sessionname, response.session);
                         }
                         
                         //se response foi chamado, executa ação
@@ -109,7 +120,7 @@ public class Route extends HttpServlet {
                                 };
                                 break;
                             case ERROR :
-                                if (response.entity == null) { 
+                                if (response.entity == null) {
                                     httpResponse.sendError(response.status); 
                                 } else { 
                                     httpResponse.sendError(response.status, (String) response.entity);
@@ -137,16 +148,24 @@ public class Route extends HttpServlet {
         }
     }
     
-    private String pathBuilder(String path1, String path2) {
-        if (path2.startsWith("/")) {
-            return path2;
+    private String pathBuilder(String mainpath, String path) {
+        if (path.equals("/")) {
+            return mainpath;
         }
         
-        return (path1.endsWith("/")) ? path1 + path2 : path1 + "/" + path2;
+        if (path.startsWith("/")) {
+            return path;
+        }
+        
+        return (mainpath.endsWith("/")) ? mainpath + path : mainpath + "/" + path;
     }
     
     private boolean find(String annotationURI, String requestURI) {
         if (annotationURI.equals(requestURI)) {
+            return true;
+        }
+        
+        if (requestURI.equals("/")) {
             return true;
         }
         

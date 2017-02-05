@@ -6,6 +6,8 @@ public class View {
     protected String location;
     protected String entityname;
     protected Object entity;
+    protected String sessionname;
+    protected Object session;
     protected ResponseType responseType;
     
     public View ok(String location) {
@@ -77,6 +79,20 @@ public class View {
         this.entityname = name;
         this.entity = value;
         return this;
+    }
+    
+    public View json(Object value) {
+        this.status = 200;
+        this.location = null;
+        this.entity = value;
+        this.responseType = ResponseType.DISPATCHER;
+        return this;
+    }
+    
+    public View with(String session, Object data) {
+        this.sessionname = session;
+        this.session = data;
+        return this;   
     }
     
 }

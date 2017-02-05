@@ -25,28 +25,31 @@ public class RouteInitializer implements ServletContainerInitializer {
             List<String> routes = new ArrayList<>();
 
             if (objectClasses != null) {
-                for (Class<?> objectClass : objectClasses) {                    
+                for (Class<?> objectClass : objectClasses) {
                     if (!objectClass.isAnnotationPresent(Controller.class)) {
                         continue;
                     }
             
                     //captura classes com anotação @Controller
-                    Reflections reflections = new ReflectionBuilder(app.resource).build();
-                    Set<Method> methods = reflections.getMethodsAnnotatedWith(Path.class);
+                    /*Reflections reflections = new ReflectionBuilder(app.resource).build();
+                    Set<Method> methods = reflections.getMethodsAnnotatedWith(Path.class);*/
+                    Method[] methods = objectClass.getMethods();
                     String mainpath = objectClass.getAnnotation(Controller.class).value();
                     
                     for (Method method : methods) {
-                        if (method.isAnnotationPresent(Path.class)) {
-                            String path = this.pathBuilder(mainpath, method.getAnnotation(Path.class).value());
-                            routes.add(path);
-                            //System.out.println("Mapping " + path + "...");
+                        if (!method.isAnnotationPresent(Path.class)) {
+                            continue;
                         }
+                        
+                        String path = this.pathBuilder(mainpath, method.getAnnotation(Path.class).value());
+                        routes.add(path);
+                        System.out.println("Mapping " + path + "...");
                     }
                 }
             }
             
             //confiura base url
-            context.setAttribute("ap_baseurl", app.url);
+            context.setAttribute("url", app.url);
             
             //configura mapeamento de rotas
             if (routes.size() > 0) {
@@ -81,6 +84,10 @@ public class RouteInitializer implements ServletContainerInitializer {
     private String pathBuilder(String mainpath, String path) {
         mainpath = this.pathParam(mainpath);
         path = this.pathParam(path);
+        
+        if (path.equals("/")) {
+            return mainpath;
+        }
         
         if (path.startsWith("/")) {
             return path;
