@@ -91,7 +91,7 @@ public class Route extends HttpServlet {
                                 switch (method.getAnnotation(Produces.class).value()[0]) {
                                     case MediaType.APPLICATION_FORM_URLENCODED:
                                         httpResponse.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                                        httpRequest.setAttribute("json", response.entity);
+                                        httpRequest.setAttribute(response.entityname, response.entity);
                                         break;
                                     case MediaType.APPLICATION_JSON: 
                                         httpResponse.setContentType(MediaType.APPLICATION_JSON);

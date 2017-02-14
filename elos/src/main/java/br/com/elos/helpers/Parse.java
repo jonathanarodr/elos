@@ -67,6 +67,12 @@ public class Parse {
         return dateStr;
     }
     
+    public Calendar toCalendar(Long value) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(value);
+        return calendar;
+    }
+    
     public Calendar toCalendar(String dateStr, String formatDate) {
         SimpleDateFormat format = new SimpleDateFormat();
         Calendar calendar = Calendar.getInstance();
