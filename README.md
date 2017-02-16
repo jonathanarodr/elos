@@ -20,7 +20,7 @@ Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se 
 
 ```xml
 <dependencies>
-    <!-- Elos: microframework Java web -->
+    <!-- https://github.com/jonathanarodr/elos-->
     <dependency>
         <groupId>br.com.elos</groupId>
         <artifactId>elos</artifactId>

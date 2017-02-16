@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 import javax.servlet.annotation.HandlesTypes;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Path;
@@ -43,7 +42,7 @@ public class RouteInitializer implements ServletContainerInitializer {
                         
                         String path = this.pathBuilder(mainpath, method.getAnnotation(Path.class).value());
                         routes.add(path);
-                        System.out.println("Mapping " + path + "...");
+                        System.out.println("Mapping route " + path);
                     }
                 }
             }
@@ -78,7 +77,7 @@ public class RouteInitializer implements ServletContainerInitializer {
             }
         }
         
-        return Arrays.toString(pathSplit);
+        return String.join("/", pathSplit);
     }
     
     private String pathBuilder(String mainpath, String path) {
