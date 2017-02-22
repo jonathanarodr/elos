@@ -78,6 +78,10 @@ public class Route extends HttpServlet {
                             return;
                         }
                         
+                        //configura response
+                        httpResponse.setStatus(response.status);
+                        httpResponse.addHeader("location", response.location);
+                        
                         //efetua serialização da entidade caso exista
                         if (response.entity != null) {
                             httpResponse.setCharacterEncoding("utf-8");
