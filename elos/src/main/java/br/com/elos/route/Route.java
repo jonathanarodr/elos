@@ -35,7 +35,7 @@ public class Route extends HttpServlet {
 
         try {
             //instancia classe de configurações
-            App app = App.getInstance(getServletContext().getInitParameter("elos"));
+            App app = App.getInstance();
             
             //captura classes com anotação @Controller
             Reflections reflections = new ReflectionBuilder(app.resource).build();
@@ -80,7 +80,15 @@ public class Route extends HttpServlet {
                         
                         //configura response
                         httpResponse.setStatus(response.status);
-                        httpResponse.addHeader("location", response.location);
+                        
+                        if (response.responseType != ResponseType.ERROR) {
+                            httpResponse.addHeader("location", response.location);
+                        }
+                        
+                        //registra session caso exista
+                        if (response.session != null) {
+                            httpRequest.getSession().setAttribute(response.sessionname, response.session);
+                        }
                         
                         //efetua serialização da entidade caso exista
                         if (response.entity != null) {
@@ -90,6 +98,7 @@ public class Route extends HttpServlet {
                             if (!method.isAnnotationPresent(Produces.class)) {
                                 httpResponse.setContentType(MediaType.APPLICATION_JSON);
                                 httpResponse.getWriter().write(new Json().build().toJson(response.entity));
+                                httpResponse.getWriter().write(new Json().build().toJson(response.responseMessage));
                                 return;
                             } else {
                                 switch (method.getAnnotation(Produces.class).value()[0]) {
@@ -104,11 +113,6 @@ public class Route extends HttpServlet {
                                     default: throw new IllegalArgumentException("MediaType " + method.getAnnotation(Produces.class).value()[0] + " not configured");
                                 }
                             }
-                        }
-                        
-                        //registra session caso exista
-                        if (response.session != null) {
-                            httpRequest.getSession().setAttribute(response.sessionname, response.session);
                         }
                         
                         //se response foi chamado, executa ação

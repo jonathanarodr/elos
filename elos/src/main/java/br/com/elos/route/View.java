@@ -9,6 +9,7 @@ public class View {
     protected String sessionname;
     protected Object session;
     protected ResponseType responseType;
+    protected ResponseMessage responseMessage;
     
     public View ok(String location) {
         this.status = 200;
@@ -85,7 +86,17 @@ public class View {
         this.status = 200;
         this.location = null;
         this.entity = value;
-        this.responseType = ResponseType.DISPATCHER;
+        this.responseType = null;
+        this.responseMessage = null;
+        return this;
+    }
+    
+    public View json(Object value, ResponseMessage responseMessage) {
+        this.status = 200;
+        this.location = null;
+        this.entity = value;
+        this.responseType = null;
+        this.responseMessage = responseMessage;
         return this;
     }
     

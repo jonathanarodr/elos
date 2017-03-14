@@ -97,13 +97,24 @@ public class MySQL {
         return fieldId;
     }
 
+    private String getColumnName(Field field) {
+        return (field.isAnnotationPresent(Column.class)) ? field.getAnnotation(Column.class).name() : field.getName();
+    }
+    
+    
     private void extractField(Object entity, Field field) throws IllegalArgumentException, IllegalAccessException {
+        this.extractField(entity, field, null);
+    }
+    
+    private void extractField(Object entity, Field field, String columnName) throws IllegalArgumentException, IllegalAccessException {
         this.entityMap = null;
-        this.column = null;
+        this.column = columnName;
         this.value = null;
-
-        //utiliza nome serializado ou nome do próprio atributo da classe
-        this.column = (field.isAnnotationPresent(Column.class)) ? field.getAnnotation(Column.class).name() : field.getName();
+       
+        //utiliza nome serializado ou nome do próprio atributo da classe caso o nome auxiliar não tenha sido informado
+        if (this.column == null) {    
+            this.column = this.getColumnName(field);
+        }
 
         //captura valor do field
         this.access = field.isAccessible();
@@ -157,14 +168,22 @@ public class MySQL {
     }
 
     private void populateField(Object entity, Field field) throws IllegalArgumentException, IllegalAccessException, SQLException {
+        this.populateField(entity, field, null);
+    }
+    
+    private void populateField(Object entity, Field field, String columnName) throws IllegalArgumentException, IllegalAccessException, SQLException {
         if (field.isAnnotationPresent(Transient.class)) {
             return;
         }
         
-        this.column = null;
+        this.column = columnName;
         this.value = null;
         
-        this.column = (field.isAnnotationPresent(Column.class)) ? field.getAnnotation(Column.class).name() : field.getName();
+        //utiliza nome serializado ou nome do próprio atributo da classe caso o nome auxiliar não tenha sido informado
+        if (this.column == null) {    
+            this.column = this.getColumnName(field);
+        }
+        
         this.value = this.resultset.getObject(this.column);
         this.access = field.isAccessible();
         field.setAccessible(true);
@@ -465,11 +484,10 @@ public class MySQL {
                     this.extractField(this.entity, field);
 
                     if (this.isEntityMap(field)) {
-                        System.out.println(field.getType());
                         this.entityMap = field.getType().newInstance();
 
                         if ((this.entityMap.getClass().isAnnotationPresent(Entity.class))) {
-                            this.extractField(this.entityMap, this.getFieldId(this.entityMap));
+                            this.extractField(this.entityMap, this.getFieldId(this.entityMap), (field.isAnnotationPresent(Column.class)) ? this.getColumnName(field) : null);
                             this.query.append(this.column + ",");
                         }
                     } else {
@@ -497,7 +515,7 @@ public class MySQL {
                 for (Field field : fields) {
                     if (this.isEntityMap(field)) {
                         this.entityMap = field.getType().newInstance();
-                        this.populateField(this.entityMap, this.getFieldId(this.entityMap));
+                        this.populateField(this.entityMap, this.getFieldId(this.entityMap), (field.isAnnotationPresent(Column.class)) ? this.getColumnName(field) : null);
 
                         this.access = field.isAccessible();
                         field.setAccessible(true);

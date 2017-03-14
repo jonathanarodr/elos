@@ -2,8 +2,12 @@ package br.com.elos.serialization;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.Gson;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import javax.servlet.http.HttpServletRequest;
 
 public class Json {
     
@@ -20,6 +24,14 @@ public class Json {
         this.builder.setExclusionStrategies(new ExcludeStrategy());
         
         return this.builder.create();
+    }
+    
+    public String getJson(HttpServletRequest request) {
+        try {
+            return new BufferedReader(new InputStreamReader(request.getInputStream(), "UTF-8")).readLine();
+        } catch (IOException ex) {
+            return null;
+        }
     }
     
 }

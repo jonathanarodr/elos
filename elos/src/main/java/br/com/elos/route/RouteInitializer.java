@@ -19,7 +19,6 @@ public class RouteInitializer implements ServletContainerInitializer {
     @Override
     public void onStartup (Set<Class<?>> objectClasses, ServletContext context) throws ServletException {	
         try {
-            //instancia classe de configurações
             App app = App.getInstance(context.getInitParameter("elos"));
             List<String> routes = new ArrayList<>();
 
@@ -30,8 +29,6 @@ public class RouteInitializer implements ServletContainerInitializer {
                     }
             
                     //captura classes com anotação @Controller
-                    /*Reflections reflections = new ReflectionBuilder(app.resource).build();
-                    Set<Method> methods = reflections.getMethodsAnnotatedWith(Path.class);*/
                     Method[] methods = objectClass.getMethods();
                     String mainpath = objectClass.getAnnotation(Controller.class).value();
                     
@@ -48,7 +45,7 @@ public class RouteInitializer implements ServletContainerInitializer {
             }
             
             //confiura base url
-            context.setAttribute("url", app.url);
+            context.setAttribute("url", app.serve_url);
             
             //configura mapeamento de rotas
             if (routes.size() > 0) {
