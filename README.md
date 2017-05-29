@@ -1,4 +1,6 @@
 ## Elos - Guia do Usuário
+![Build status](https://travis-ci.org/jonathanarodr/elos.svg?branch=master)
+
 1. [Introdução](#Introducao)
 2. [Instalacao](#Instalacao)
 3. [Configuração](#Configuracao)
