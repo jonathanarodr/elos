@@ -1,2 +1,4 @@
 language: java
-script: /elos/mvn clean verify
+script:
+    cd elos;
+    mvn clean verify;
