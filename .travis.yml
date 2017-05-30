@@ -1,4 +1,6 @@
 language: java
+jdk:
+  - oraclejdk8
 script:
     cd elos;
     mvn clean verify;
