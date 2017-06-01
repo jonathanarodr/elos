@@ -45,7 +45,7 @@ public class RouteInitializer implements ServletContainerInitializer {
             }
             
             //confiura base url
-            context.setAttribute("url", app.serve_url);
+            context.setAttribute("url", app.server_url);
             
             //configura mapeamento de rotas
             if (routes.size() > 0) {

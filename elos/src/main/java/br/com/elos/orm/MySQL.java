@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -15,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -42,7 +44,7 @@ public class MySQL {
     protected String sql;
     protected Connection connection;
     private final Util util = new Util();
-    
+
     //comandos TCL
     public void close() {
         try {
@@ -79,9 +81,9 @@ public class MySQL {
 
     private boolean isEntityMap(Field entity) {
         return (entity.isAnnotationPresent(OneToOne.class))
-            || (entity.isAnnotationPresent(OneToMany.class))
-            || (entity.isAnnotationPresent(ManyToOne.class))
-            || (entity.isAnnotationPresent(ManyToMany.class));
+                || (entity.isAnnotationPresent(OneToMany.class))
+                || (entity.isAnnotationPresent(ManyToOne.class))
+                || (entity.isAnnotationPresent(ManyToMany.class));
     }
 
     private Field getFieldId(Object entity) {
@@ -100,19 +102,18 @@ public class MySQL {
     private String getColumnName(Field field) {
         return (field.isAnnotationPresent(Column.class)) ? field.getAnnotation(Column.class).name() : field.getName();
     }
-    
-    
+
     private void extractField(Object entity, Field field) throws IllegalArgumentException, IllegalAccessException {
         this.extractField(entity, field, null);
     }
-    
+
     private void extractField(Object entity, Field field, String columnName) throws IllegalArgumentException, IllegalAccessException {
         this.entityMap = null;
         this.column = columnName;
         this.value = null;
-       
+
         //utiliza nome serializado ou nome do próprio atributo da classe caso o nome auxiliar não tenha sido informado
-        if (this.column == null) {    
+        if (this.column == null) {
             this.column = this.getColumnName(field);
         }
 
@@ -170,20 +171,20 @@ public class MySQL {
     private void populateField(Object entity, Field field) throws IllegalArgumentException, IllegalAccessException, SQLException {
         this.populateField(entity, field, null);
     }
-    
+
     private void populateField(Object entity, Field field, String columnName) throws IllegalArgumentException, IllegalAccessException, SQLException {
         if (field.isAnnotationPresent(Transient.class)) {
             return;
         }
-        
+
         this.column = columnName;
         this.value = null;
-        
+
         //utiliza nome serializado ou nome do próprio atributo da classe caso o nome auxiliar não tenha sido informado
-        if (this.column == null) {    
+        if (this.column == null) {
             this.column = this.getColumnName(field);
         }
-        
+
         this.value = this.resultset.getObject(this.column);
         this.access = field.isAccessible();
         field.setAccessible(true);
@@ -288,7 +289,7 @@ public class MySQL {
 
                     if (this.isEntityMap(field)) {
                         if ((this.entityMap != null) && (this.entityMap.getClass().isAnnotationPresent(Entity.class))) {
-                            this.extractField(this.entityMap, this.getFieldId(this.entityMap));
+                            this.extractField(this.entityMap, this.getFieldId(this.entityMap), this.getColumnName(field));
                             this.query.append(this.column + ",");
                             this.queryval.append("?,");
                             this.values.add(this.value);
@@ -303,11 +304,11 @@ public class MySQL {
 
             //monta query final
             this.sql = "insert into " + table
-                     + " (" + this.query.substring(0, this.query.length() - 1)
-                     + ") values (" + this.queryval.substring(0, this.queryval.length() - 1) + ");";
+                    + " (" + this.query.substring(0, this.query.length() - 1)
+                    + ") values (" + this.queryval.substring(0, this.queryval.length() - 1) + ");";
 
             //configura statement
-            this.preparedst = this.connection.prepareStatement(this.sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            this.preparedst = this.connection.prepareStatement(this.sql, Statement.RETURN_GENERATED_KEYS);
             this.preparedst = new StatementFactory().getStatement(this.preparedst, this.values);
 
             //executa comando e captura resultset
@@ -359,7 +360,7 @@ public class MySQL {
 
                     if (this.isEntityMap(field)) {
                         if ((this.entityMap != null) && (this.entityMap.getClass().isAnnotationPresent(Entity.class))) {
-                            this.extractField(this.entityMap, this.getFieldId(this.entityMap));
+                            this.extractField(this.entityMap, this.getFieldId(this.entityMap), this.getColumnName(field));
                             this.query.append(this.column + " = ?,");
                             this.values.add(this.value);
                         }
@@ -374,9 +375,9 @@ public class MySQL {
             this.extractField(this.entity, fieldId);
             this.values.add(this.value);
             this.sql = "update " + table
-                     + " set " + this.query.substring(0, this.query.length() - 1)
-                     + " where " + this.column + " = ?;";
- 
+                    + " set " + this.query.substring(0, this.query.length() - 1)
+                    + " where " + this.column + " = ?;";
+
             //configura statement
             this.preparedst = this.connection.prepareStatement(this.sql);
             this.preparedst = new StatementFactory().getStatement(this.preparedst, this.values);
@@ -398,12 +399,12 @@ public class MySQL {
 
     public boolean update(QueryBuilder querybuilder) {
         this.clear();
-        
+
         try {
             querybuilder.build();
             this.sql = querybuilder.getSql();
             this.values = querybuilder.getValues();
-            
+
             //configura statement
             this.preparedst = this.connection.prepareStatement(this.sql);
             this.preparedst = new StatementFactory().getStatement(this.preparedst, this.values);
@@ -422,7 +423,7 @@ public class MySQL {
 
         return this.status;
     }
-    
+
     public boolean delete(Object object) {
         this.clear();
         this.entity = object;
@@ -443,7 +444,7 @@ public class MySQL {
             this.extractField(this.entity, fieldId);
             this.values.add(this.value);
             this.sql = "delete from " + table
-                     + " where " + this.column + " = ?;";
+                    + " where " + this.column + " = ?;";
 
             //configura statement
             this.preparedst = this.connection.prepareStatement(this.sql);
@@ -487,7 +488,7 @@ public class MySQL {
                         this.entityMap = field.getType().newInstance();
 
                         if ((this.entityMap.getClass().isAnnotationPresent(Entity.class))) {
-                            this.extractField(this.entityMap, this.getFieldId(this.entityMap), (field.isAnnotationPresent(Column.class)) ? this.getColumnName(field) : null);
+                            this.extractField(this.entityMap, this.getFieldId(this.entityMap), this.getColumnName(field));
                             this.query.append(this.column + ",");
                         }
                     } else {
@@ -500,8 +501,8 @@ public class MySQL {
             this.extractField(this.entity, fieldId);
             this.values.add(id);
             this.sql = "select " + this.query.substring(0, this.query.length() - 1)
-                     + " from " + table
-                     + " where " + this.column + " = ?;";
+                    + " from " + table
+                    + " where " + this.column + " = ?;";
 
             //configura statement
             this.preparedst = this.connection.prepareStatement(this.sql);
@@ -541,6 +542,51 @@ public class MySQL {
         return this.entity;
     }
     
+    public Object findOrFail(Class<?> entityClass, int id) {
+    	Object object = this.find(entityClass, id);
+ 
+    	if (this.status == false) {
+    		throw new EntityNotFoundException("Entity " + entityClass + " not found");
+    	}
+    		
+    	return object;
+    }
+    
+    public Object findMerge(Object object, Class<?> entityClass, int id) {
+        Object objectfind = this.find(entityClass, id);
+
+        if (objectfind == null) {
+            return object;
+        }
+
+        try {
+            Field fieldaux;
+
+            for (Field field : object.getClass().getDeclaredFields()) {
+                this.access = field.isAccessible();
+                field.setAccessible(true);
+                this.value = field.get(object);
+                field.setAccessible(this.access);
+
+                if (this.value == null) {
+                    continue;
+                }
+
+                fieldaux = objectfind.getClass().getDeclaredField(field.getName());
+                this.access = fieldaux.isAccessible();
+                fieldaux.setAccessible(true);
+                fieldaux.set(objectfind, this.value);
+                fieldaux.setAccessible(this.access);
+            }
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException ex) {
+            this.status = false;
+            ex.printStackTrace();
+            return null;
+        }
+
+        return objectfind;
+    }
+
     public ResultSet select(QueryBuilder querybuilder) {
         this.clear();
 
@@ -559,21 +605,21 @@ public class MySQL {
             this.rows = this.resultset.getRow();
             this.resultset.beforeFirst();
             this.status = true;
-            
+
             System.out.println("Script: " + this.sql + "\nValues: " + Arrays.toString(this.values.toArray()) + "\nAffected: " + this.rows + " row(s)");
         } catch (SQLException ex) {
             this.status = false;
             this.close();
             ex.printStackTrace();
         }
-        
+
         return this.resultset;
     }
-    
+
     public CallableStatement call(String objectname) {
         this.status = false;
         this.sql = "{" + objectname + "}";
-        
+
         try {
             //executa comando
             this.callablest = this.connection.prepareCall(this.sql);
@@ -589,14 +635,14 @@ public class MySQL {
 
         return this.callablest;
     }
-    
+
     public CallableStatement call(QueryBuilder querybuilder) {
         this.clear();
-        
+
         try {
             querybuilder.build();
             this.sql = querybuilder.getSql();
-            
+
             //configura statement e executa comando
             this.callablest = this.connection.prepareCall(this.sql);
             this.callablest = new StatementFactory().getStatement(this.callablest, querybuilder.getValues(), querybuilder.getValuesOut());
@@ -612,5 +658,44 @@ public class MySQL {
 
         return this.callablest;
     }
-    
+
+    public <T> T fromResultset(ResultSet resultset, Class<?> entityClass) {
+        this.clear();
+
+        try {
+            this.entity = entityClass.newInstance();
+
+            Field[] fields = this.entity.getClass().getDeclaredFields();
+
+            this.resultset = resultset;
+
+            for (Field field : fields) {
+                if (this.isEntityMap(field)) {
+                    this.entityMap = field.getType().newInstance();
+                    this.populateField(
+                            this.entityMap,
+                            this.getFieldId(this.entityMap),
+                            (field.isAnnotationPresent(Column.class)) ? this.getColumnName(field) : null
+                    );
+
+                    this.access = field.isAccessible();
+                    field.setAccessible(true);
+                    field.set(this.entity, this.entityMap);
+                    field.setAccessible(this.access);
+                } else {
+                    this.populateField(this.entity, field);
+                }
+            }
+            this.rows = 1;
+            this.status = true;
+
+        } catch (IllegalAccessException | InstantiationException | SQLException ex) {
+            this.close();
+            ex.printStackTrace();
+        }
+        
+        //Class<?> t = this.entity.getClass();// this.entity;        
+        return (T) this.entity;
+    }
+
 }

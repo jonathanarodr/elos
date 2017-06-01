@@ -9,22 +9,26 @@ public enum Rules {
     DATETIME,
     MINLENGTH,
     MAXLENGTH,
-    EMAIL;
+    EMAIL,
+    UNIQUE,
+    EXISTS;
     
-    private int length;
     private String message;
+    private String param;
 
     private String messageDef() {
         switch (this) {
             case REQUIRED : return "Este campo é requerido";
             case INTEGER : return "Número inteiro inválido";
             case FLOAT : return "Número decimal inválido";
-            case DATE : return "Data inválida, informe algo como 00/00/0000";
-            case TIME : return "Hora inválida, informe algo como 00:00:00";
-            case DATETIME : return "Data inválida, informe algo como 00/00/0000 00:00:00";
-            case MINLENGTH : return "Informe no mínimo " + this.length + " caracteres";
-            case MAXLENGTH : return "Informe no máximo " + this.length + " caracteres";
+            case DATE : return "Digite uma data válida";
+            case TIME : return "Digite uma hora válida";
+            case DATETIME : return "Data/hora inválida para o formato " + this.param;
+            case MINLENGTH : return "Informe no mínimo " + this.param + " caracteres";
+            case MAXLENGTH : return "Informe no máximo " + this.param + " caracteres";
             case EMAIL : return "E-mail inválido, informe algo como exemplo@dominio.com.br";
+            case UNIQUE : return "O valor informado já existe";
+            case EXISTS : return "O valor informado existe";
             default : return null;
         }
     }
@@ -45,12 +49,12 @@ public enum Rules {
         this.message = message;
     }
     
-    public int length() {
-        return this.length;
+    public String param() {
+        return this.param;
     }
 
-    public void setLength(int length) {
-        this.length = length;
+    public void setParam(String param) {
+        this.param = param;
     }
     
 }

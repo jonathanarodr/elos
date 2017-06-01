@@ -2,6 +2,7 @@ package br.com.elos.route;
 
 import br.com.elos.App;
 import br.com.elos.serialization.Json;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.reflections.Reflections;
 
+@MultipartConfig
 //@WebServlet(name = "route", urlPatterns = "/*")
 public class Route extends HttpServlet {
     
@@ -81,13 +84,20 @@ public class Route extends HttpServlet {
                         //configura response
                         httpResponse.setStatus(response.status);
                         
-                        if (response.responseType != ResponseType.ERROR) {
+                        if (response.responseType == ResponseType.REDIRECT) {
                             httpResponse.addHeader("location", response.location);
                         }
                         
                         //registra session caso exista
                         if (response.session != null) {
                             httpRequest.getSession().setAttribute(response.sessionname, response.session);
+                            
+                            //se redirecionamento for em json em entidade, serializa response e finaliza processo
+                            if ((response.entity == null) && ((!method.isAnnotationPresent(Produces.class)) || (method.getAnnotation(Produces.class).value()[0].equals(MediaType.APPLICATION_JSON)))) {
+                            	httpResponse.setCharacterEncoding("utf-8");
+                            	httpResponse.getWriter().write(new Json().build().toJson(response));
+                            	return;
+                            }
                         }
                         
                         //efetua serialização da entidade caso exista
@@ -97,8 +107,8 @@ public class Route extends HttpServlet {
                             //se não houver definição de MediaType, configura padrão em json
                             if (!method.isAnnotationPresent(Produces.class)) {
                                 httpResponse.setContentType(MediaType.APPLICATION_JSON);
-                                httpResponse.getWriter().write(new Json().build().toJson(response.entity));
-                                httpResponse.getWriter().write(new Json().build().toJson(response.responseMessage));
+                                httpResponse.getWriter().write(new Json().build().toJson(response));
+
                                 return;
                             } else {
                                 switch (method.getAnnotation(Produces.class).value()[0]) {
@@ -108,7 +118,8 @@ public class Route extends HttpServlet {
                                         break;
                                     case MediaType.APPLICATION_JSON: 
                                         httpResponse.setContentType(MediaType.APPLICATION_JSON);
-                                        httpResponse.getWriter().write(new Json().build().toJson(response.entity));
+                                        httpResponse.getWriter().write(new Json().build().toJson(response));
+                                        
                                         return;
                                     default: throw new IllegalArgumentException("MediaType " + method.getAnnotation(Produces.class).value()[0] + " not configured");
                                 }

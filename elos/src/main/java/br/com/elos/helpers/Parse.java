@@ -17,7 +17,7 @@ public class Parse {
     
     public Integer toInt(String intStr) {
         try {
-            return Integer.parseInt((String) intStr);
+            return Integer.parseInt(intStr);
         } catch(Exception ex) {
             return null;
         }
@@ -25,7 +25,7 @@ public class Parse {
     
     public Float toFloat(String floatStr) {
         try {
-            return Float.parseFloat((String) floatStr);
+            return Float.parseFloat(floatStr);
         } catch(Exception ex) {
             return null;
         }   
@@ -33,7 +33,7 @@ public class Parse {
     
     public Double toDouble(String doubleStr) {
         try {
-            return Double.parseDouble((String) doubleStr);
+            return Double.parseDouble(doubleStr);
         } catch(Exception ex) {
             return null;
         }   
@@ -44,8 +44,10 @@ public class Parse {
         Date date = null;
         
         try {
+        	format.setLenient(false);
             format.applyPattern(formatDate);
             date = format.parse(dateStr);
+            System.out.println(date);
         } catch(ParseException ex) {
             return null;
         }
@@ -56,9 +58,9 @@ public class Parse {
     public String toString(Date date, String formatDate) {
         String dateStr = null;
         SimpleDateFormat format = new SimpleDateFormat(formatDate);
-        format.setLenient(false);
 
         try {
+        	format.setLenient(false);
             dateStr = format.format(date);
         } catch (Exception ex) {
             return null;
@@ -78,6 +80,7 @@ public class Parse {
         Calendar calendar = Calendar.getInstance();
         
         try {
+        	format.setLenient(false);
             format.applyPattern(formatDate);
             calendar.setTime(format.parse(dateStr));
         } catch(ParseException ex) {
@@ -90,9 +93,9 @@ public class Parse {
     public String toString(Calendar calendar, String formatDate) {
         String dateStr = null;
         SimpleDateFormat format = new SimpleDateFormat(formatDate);
-        format.setLenient(false);
 
         try {
+        	format.setLenient(false);
             dateStr = format.format(calendar.getTime());
         } catch (Exception ex) {
             return null;

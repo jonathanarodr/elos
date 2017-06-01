@@ -3,14 +3,24 @@ package br.com.elos.route;
 import com.google.gson.annotations.SerializedName;
 
 public enum MessageType {
-    
-    @SerializedName("msg_success")
-    SUCCESS,
+
+	@SerializedName("msg_success")
+    SUCCESS("msg_success"),
     @SerializedName("msg_info")
-    INFO,
+    INFO("msg_info"),
     @SerializedName("msg_warning")
-    WARNING,
+    WARNING("msg_warning"),
     @SerializedName("msg_error")
-    ERROR;
+    ERROR("msg_error");
     
+    private String value;
+    
+    MessageType(String value) {
+        this.value = value;
+    }
+    
+    public String value() {
+        return this.value;
+    }
+	
 }

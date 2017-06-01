@@ -112,7 +112,7 @@ public class Util {
     }
     
     public String random(int lenght) {
-        return new BigInteger((lenght*5), new SecureRandom()).toString(32).substring(0, lenght);
+        return new BigInteger(lenght*6, new SecureRandom()).toString(32).substring(0, lenght);
     }
 
 }

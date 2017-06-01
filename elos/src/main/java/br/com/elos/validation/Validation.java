@@ -2,6 +2,11 @@ package br.com.elos.validation;
 
 import br.com.elos.helpers.Parse;
 import br.com.elos.helpers.Util;
+import br.com.elos.orm.DB;
+import br.com.elos.orm.QueryBuilder;
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -14,6 +19,7 @@ public class Validation {
     private final int prValue = 0;
     private final int prRule = 1;
     private final int prMessage = 2;
+    private final int prValidator = 3;
     
     /**
      * método responsável pela validação do valor inteiro válido.
@@ -43,41 +49,50 @@ public class Validation {
     
     /**
      * método responsável pela validação do valor data válido.
-     * @param value parâmetro string no formato 'dd/MM/yyyy'.
-     * @return retorna 'true' se valor é uma data válida ou 'false' para valor inválido.
+     * @param value parâmetro a ser validado
+     * @param format parâmetro string no formato a ser validado.
+     * @return
      */
-    public boolean isDate(Object value) {
+    public boolean isDate(Object value, String format) {
         if (value == null) {
             return false;
         }
         
-        return (new Parse().toDate(value.toString(), "dd/MM/yyyy") != null);
+        Parse parse = new Parse();
+        
+        if (value instanceof GregorianCalendar) {
+        	return (parse.toString((Calendar)value, format) != null);
+        } else {
+        	return (parse.toCalendar(value.toString(), format) != null);
+        }
     }
-
+    
     /**
      * método responsável pela validação do valor hora válido.
-     * @param value parâmetro string no formato 'HH:mm:ss'.
-     * @return retorna 'true' se valor é uma hora válida ou 'false' para valor inválido.
-     */    
-    public boolean isTime(Object value) {
+     * @param value parâmetro a ser validado
+     * @param format parâmetro string no formato a ser validado.
+     * @return
+     */
+    public boolean isTime(Object value, String format) {
         if (value == null) {
             return false;
         }
         
-        return (new Parse().toDate(value.toString(), "HH:mm:ss") != null);
+        return (new Parse().toDate(value.toString(), format) != null);
     }
 
     /**
      * método responsável pela validação do valor data/hora válido.
-     * @param value parâmetro string no formato 'dd/MM/yyyy HH:mm:ss'.
+     * @param value parâmetro a ser validado
+     * @param format parâmetro string no formato a ser validado.
      * @return retorna 'true' se valor é uma data/hora válida ou 'false' para valor inválido.
      */    
-    public boolean isDateTime(Object value) {
+    public boolean isDateTime(Object value, String format) {
         if (value == null) {
             return false;
         }
         
-        return (new Parse().toDate(value.toString(), "dd/MM/yyyy HH:mm:ss") != null);
+        return (new Parse().toDate(value.toString(), format) != null);
     }
    
     /**
@@ -141,6 +156,75 @@ public class Validation {
         }  
     }
     
+    //public boolean isUnique(Object value, String table, String column, String columnExcept, Object except) {
+    public boolean isUnique(Object value, String[] param) {
+        if ((param.length != 2) && (param.length != 4)) {
+            throw new IllegalArgumentException("Validation rule unique requires 2 or 4 parameters");
+        }
+        
+        DB db = new DB();
+        QueryBuilder querybuilder = new QueryBuilder();
+        
+        String sql = "select 1"
+                   + "  from " + param[0]
+                   + " where " + param[1] + " = :p1 ";
+        
+        if (param.length == 2) {
+            querybuilder.createQuery(sql);
+            querybuilder.setParameter("p1", value);
+        } else {
+            sql += "and " + param[2] + " <> " + param[3];
+            
+            querybuilder.createQuery(sql);
+            querybuilder.setParameter("p1", value);
+        }
+        
+        sql += ";";
+        
+        try {
+            return !db.select(querybuilder).next();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        } finally {
+            db.close();
+        }
+    }
+    
+    public boolean isExists(Object value, String[] param) {
+        if ((param.length != 2) && (param.length != 4)) {
+            throw new IllegalArgumentException("Validation rule exists requires 2 or 4 parameters");
+        }
+        
+        DB db = new DB();
+        QueryBuilder querybuilder = new QueryBuilder();
+        
+        String sql = "select 1"
+                   + "  from " + param[0]
+                   + " where " + param[1] + " = :p1 ";
+        
+        if (param.length == 2) {
+            querybuilder.createQuery(sql);
+            querybuilder.setParameter("p1", value);
+        } else {
+            sql += "and " + param[2] + " = " + param[3];
+            
+            querybuilder.createQuery(sql);
+            querybuilder.setParameter("p1", value);
+        }
+        
+        sql += ";";
+        
+        try {
+            return db.select(querybuilder).next();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            return false;
+        } finally {
+            db.close();
+        }
+    }
+    
     /**
      * método responsável por limpar array de valores e erros da classe, deve ser chamado antes da chamada do método <strong>add()</strong>.
      */
@@ -156,13 +240,18 @@ public class Validation {
      * @param rules regras para validação.
      * @param message mensagem padrão caso validação seja inválida.
      */
+    public void add(String field, Object value, String rules, Validator validator) {
+        Object newRule[] = {value, rules, null, validator};
+        this.rules.put(field, newRule);
+    }
+    
     public void add(String field, Object value, String rules, String message) {
-        Object newRule[] = {value, rules, message};
+        Object newRule[] = {value, rules, message, null};
         this.rules.put(field, newRule);
     }
     
     public void add(String field, Object value, String rules) {
-        Object newRule[] = {value, rules, null};
+        Object newRule[] = {value, rules, null, null};
         this.rules.put(field, newRule);
     }
     
@@ -171,13 +260,15 @@ public class Validation {
      * @return retorna 'true' caso todos os field's são válidos ou 'false' caso tenha ocorrido o preenchimento inválido dos field's.
      */
     public boolean validate() {
+        System.out.println("Start validation...");
+        
         Object value = null;
         String message = null;
         
         //percorre todos os fields registrados no list
         for (Map.Entry<String,Object[]> field : this.rules.entrySet()) {
             //captura parâmetros
-            value = (Object) field.getValue()[this.prValue];
+            value = field.getValue()[this.prValue];
             message = (String) field.getValue()[this.prMessage];
             
             //captura todas as regras existentes para validação
@@ -185,16 +276,23 @@ public class Validation {
             
             //valida regras
             for(String rule : rules) {                
-                //se houver parâmetro adicional para min ou max, captura informações
-                int length = 0;
+                //se houver parâmetro adicional, captura informações
+                String param = "";
                 if (rule.indexOf("[") > 0) {
-                    length = Integer.parseInt(rule.substring(rule.indexOf("[")+1, rule.indexOf("]")));
-                    rule   = rule.replace("[" + length + "]", "");
+                    param = rule.substring(rule.indexOf("[")+1, rule.indexOf("]"));
+                    rule = rule.replace("[" + param + "]", "");
+                }
+                
+                //verifica utilizaçao de validator
+                Validator validator = (Validator) field.getValue()[this.prValidator];
+                
+                if ((validator != null) && (validator.messages() != null)) {
+                	message = validator.messages().get(field.getKey() + "." + rule);
                 }
                 
                 //configura enum
                 Rules ruleEnum = Rules.valueOf(rule.toUpperCase());
-                ruleEnum.setLength(length);
+                ruleEnum.setParam(param);
                 ruleEnum.setMessage(message);
                 
                 switch (ruleEnum) {
@@ -220,35 +318,47 @@ public class Validation {
                     }
                     
                     case DATE : {
-                        if ((!this.isDate(value)) && (!this.isError(field.getKey()))) {
+                    	if ((param == null) || (param.equals(""))) {
+                    		param = "yyyy-MM-dd";
+                    		ruleEnum.setParam(param);
+                        }
+                        if ((!this.isDate(value, param)) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case TIME : {
-                        if ((!this.isTime(value)) && (!this.isError(field.getKey()))) {
+                    	if ((param == null) || (param.equals(""))) {
+                    		param = "HH:mm:ss";
+                    		ruleEnum.setParam(param);
+                        }
+                        if ((!this.isTime(value, param)) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case DATETIME : {
-                        if ((!this.isDateTime(value)) && (!this.isError(field.getKey()))) {
+                    	if ((param == null) || (param.equals(""))) {
+                    		param = "yyyy-MM-dd HH:mm:ss";
+                    		ruleEnum.setParam(param);
+                        }
+                        if ((!this.isDateTime(value, param)) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case MINLENGTH : {
-                        if ((!this.isMinLength(value, ruleEnum.length())) && (!this.isError(field.getKey()))) {
+                        if ((!this.isMinLength(value, Integer.parseInt(ruleEnum.param()))) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
                     }
                     
                     case MAXLENGTH : {
-                        if ((!this.isMaxLength(value, ruleEnum.length())) && (!this.isError(field.getKey()))) {
+                        if ((!this.isMaxLength(value, Integer.parseInt(ruleEnum.param()))) && (!this.isError(field.getKey()))) {
                             this.errors.put(field.getKey(), ruleEnum.message());
                         }
                         break;
@@ -260,11 +370,35 @@ public class Validation {
                         }
                         break;
                     }
+                    
+                    case UNIQUE : {
+                        if ((!this.isUnique(value, ruleEnum.param().split(","))) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
+                        }
+                        break;
+                    }
+                    
+                    case EXISTS : {
+                        if ((!this.isExists(value, ruleEnum.param().split(","))) && (!this.isError(field.getKey()))) {
+                            this.errors.put(field.getKey(), ruleEnum.message());
+                        }
+                        break;
+                    }
                 }
             }
         }
         
+        if (this.errors.isEmpty()) {
+            System.out.println("Validation ok");
+        } else {
+            System.out.println("Failed to validate rules" + "\nErrors: " + this.getErrors());
+        }
+        
         return this.errors.isEmpty();
+    }
+    
+    public void setError(String key, String message) {
+    	this.errors.put(key, message);	
     }
     
     /**

@@ -1,9 +1,12 @@
 package br.com.elos.route;
 
+import com.google.gson.annotations.Expose;
+
 public class View {
     
     protected int status;
     protected String location;
+    @Expose
     protected String entityname;
     protected Object entity;
     protected String sessionname;
@@ -46,7 +49,7 @@ public class View {
     }
     
     public View redirect(String location) {
-        this.status = 302;
+        this.status = 201;
         this.location = location;
         this.entity = null;
         this.responseType = ResponseType.REDIRECT;
