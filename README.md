@@ -2,7 +2,7 @@
 ![Build status](https://travis-ci.org/jonathanarodr/elos.svg?branch=master)
 
 - [Introdução](#Introducao)
-- [Instalacao](#Instalacao)
+- [Usando Elos com Maven](#Instalacao)
 - [Configuração](#Configuracao)
 - [Aprendendo o Elos](#Documentacao)
 
