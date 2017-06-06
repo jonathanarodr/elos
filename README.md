@@ -6,10 +6,10 @@
 - [Configuração](#configuracao)
 - [Documentação](#documentacao)
 
-## <a name="Introducao"></a>Introdução
+## <a name="introducao"></a>Introdução
 Elos é um microframework web desenvolvido na linguagem Java no qual possui como principal objetivo simplificar a escrita de códigos complexos em rotinas simples de fácil compreensão tornando o desenvolvimento Java algo mais produtivo e agradável.
 
-## <a name="Instalacao"></a>Usando Elos com Maven
+## <a name="instalacao"></a>Usando Elos com Maven
 Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se de ter instalado o Maven em sua máquina, feito isto adicione a seguinte dependência em seu arquivo `pom.xml`:
 
 ```xml
@@ -23,7 +23,7 @@ Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se 
 </dependencies>
 ```
 
-## <a name="Configuracao"></a>Configuração
+## <a name="configuracao"></a>Configuração
 Depois de baixado, você deve configurar seu projeto para possibilitar o uso das funcionalidades presentes no Elos. Esta configuração é bem simples, para isto, extenda a classe `App.java` e configure as propriedades de cada pacote conforme desejar.
 
 **Exemplo de configuração:**
@@ -51,5 +51,5 @@ public class AppConfig extends App {
 
 ```
 
-## <a name="Documentacao"></a>Documentação
+## <a name="documentacao"></a>Documentação
 Para conhecer mais sobre as funcionalidades do Elos, criamos uma [documentação completa](https://github.com/jonathanarodr/elos/wiki) e objetiva para você em nosso **Wiki do GitHub**.
