@@ -9,6 +9,21 @@
 
     <name>elos</name>
     <url>https://github.com/jonathanarodr/elos</url>
+    <description>Elos é um microframework criado na linguagem Java para facilitar o desenvolvimento de aplicações web.</description>
+
+	<developers>
+		<developer>
+			<id>jonathanarodr</id>
+			<name>Jonathan Rodrigues</name>
+			<email>jonathan.a.rodr@gmail.com</email>
+			<organization></organization>
+			<organizationUrl></organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>-3</timezone>
+		</developer>
+	</developers>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -96,4 +111,10 @@
             </plugin>
         </plugins>
     </build>
+
+   	<scm>
+		<connection>scm:git:git://github.com/jonathanarodr/elos</connection>
+		<developerConnection>scm:git:git@github.com:jonathanarodr/elos.git</developerConnection>
+		<url>https://github.com/jonathanarodr/elos</url>
+  	</scm>
 </project>

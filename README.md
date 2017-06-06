@@ -15,7 +15,7 @@
     * [ORM](#ORM)
 
 ## <a name="Introducao"></a>Introdução
-Elos é um microframework criado na linguagem Java para facilitar o desenvolvimento de aplicações web.
+Elos é um microframework criado na linguagem Java para criação de aplicações web.
 
 ## <a name="Instalacao"></a>Usando Elos com Maven
 Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se de ter instalado o Maven em sua máquina, feito isto adicione a seguinte dependência:
@@ -33,22 +33,27 @@ Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se 
 ```
 
 ## <a name="Configuracao"></a>Configuração
-Depois de instalar o Elos, você deve configurar o arquivo `App.java` de acordo com as insturções abaixo:
+Depois de instalar o Elos, você deve extender a classe `App.java` que possui a responsabilidade de gerenciar a configuração de todas as suas blibliotecas.
 
-## <a name="Elos"></a>Utilizando Elos
-### <a name="Logging"></a>Logging
-O Logging é um conjunto de blibliotecas
+Exemplo de configuração
 
-### <a name="Helpers"></a>Helpers
+```java
+package br.com.company.example;
 
-### <a name="Route"></a>Route
+import br.com.elos.App;
 
-### <a name="FileSystem"></a>FileSystem
+public class AppConfig extends App {
+    public AppConfig() {
+        super();
+        server_url = "http://localhost:8080/";
+        resource = "br.com.company.example.controller";
+        db_hostname = "127.0.0.1";
+        db_port = 3306;
+        db_database = "dbname";
+        db_username = "root";
+        db_password = "123";
+        storage_location = "http://localhost:8080/public/storage/";
+    }
+}
 
-### <a name="Validation"></a>Validation
-
-### <a name="Json"></a>Json
-
-### <a name="Mail"></a>Mail
-
-### <a name="ORM"></a>ORM
+```
