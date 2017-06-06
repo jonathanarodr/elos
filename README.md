@@ -1,10 +1,10 @@
-## Elos - Guia do Usuário
+# Elos - Guia do Usuário
 ![Build status](https://travis-ci.org/jonathanarodr/elos.svg?branch=master)
 
-- [Introdução](#Introducao)
-- [Usando Elos com Maven](#Instalacao)
-- [Configuração](#Configuracao)
-- [Documentação](#Documentacao)
+- [Introdução](#introducao)
+- [Usando Elos com Maven](#instalacao)
+- [Configuração](#configuracao)
+- [Documentação](#documentacao)
 
 ## <a name="Introducao"></a>Introdução
 Elos é um microframework web desenvolvido na linguagem Java no qual possui como principal objetivo simplificar a escrita de códigos complexos em rotinas simples de fácil compreensão tornando o desenvolvimento Java algo mais produtivo e agradável.
@@ -52,4 +52,4 @@ public class AppConfig extends App {
 ```
 
 ## <a name="Documentacao"></a>Documentação
-Para conhecer mais sobre as funcionalidades do Elos, criamos uma [documentação completa](https://github.com/jonathanarodr/elos/wiki) objetiva para você em nosso **Wiki do GitHub**.
+Para conhecer mais sobre as funcionalidades do Elos, criamos uma [documentação completa](https://github.com/jonathanarodr/elos/wiki) e objetiva para você em nosso **Wiki do GitHub**.
