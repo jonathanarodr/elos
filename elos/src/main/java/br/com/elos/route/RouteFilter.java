@@ -23,7 +23,7 @@ public class RouteFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) requestFilter;
         HttpServletResponse httpResponse = (HttpServletResponse) responseFilter;
         HttpSession session = httpRequest.getSession();
-       
+        
         chain.doFilter(requestFilter, responseFilter);
         
         //csrf-token

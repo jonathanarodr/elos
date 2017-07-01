@@ -1,6 +1,7 @@
 package br.com.elos.route;
 
 import br.com.elos.App;
+
 import java.lang.reflect.Method;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -11,26 +12,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.Path;
-import org.reflections.Reflections;
 
 @HandlesTypes({Controller.class})
 public class RouteInitializer implements ServletContainerInitializer {
     
     @Override
-    public void onStartup (Set<Class<?>> objectClasses, ServletContext context) throws ServletException {	
+    public void onStartup (Set<Class<?>> classes, ServletContext context) throws ServletException {	
         try {
             App app = App.getInstance(context.getInitParameter("elos"));
+            app.writeProperties();
+            
             List<String> routes = new ArrayList<>();
-
-            if (objectClasses != null) {
-                for (Class<?> objectClass : objectClasses) {
-                    if (!objectClass.isAnnotationPresent(Controller.class)) {
+            
+            if (classes != null) {
+                for (Class<?> classe : classes) {
+                    if (!classe.isAnnotationPresent(Controller.class)) {
                         continue;
                     }
             
                     //captura classes com anotação @Controller
-                    Method[] methods = objectClass.getMethods();
-                    String mainpath = objectClass.getAnnotation(Controller.class).value();
+                    Method[] methods = classe.getMethods();
+                    String mainpath = classe.getAnnotation(Controller.class).value();
                     
                     for (Method method : methods) {
                         if (!method.isAnnotationPresent(Path.class)) {
