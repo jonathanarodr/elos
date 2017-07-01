@@ -24,11 +24,12 @@ Elos utiliza o Maven para gerenciar suas dependências, portanto, certifique-se 
 ```
 
 ## <a name="configuracao"></a>Configuração
-Depois de baixado, você deve configurar seu projeto para possibilitar o uso das funcionalidades presentes no Elos. Esta configuração é bem simples, para isto, extenda a classe `App.java` e configure as propriedades de cada pacote conforme desejar.
+Depois de baixado, você deve configurar seu projeto para possibilitar o uso das funcionalidades presentes no Elos. Esta configuração é bem simples, para isto, extenda a classe `App.java` e configure as propriedades de cada pacote conforme desejar. Após finalizar a criação da classe, configure seu arquivo `web.xml` informando o paconte onde esta localizado a classe responsável pelas configurações do Elos.
 
-**Exemplo de configuração:**
+**Exemplo da classe de configuração:**
 
 ```java
+
 package br.com.company.example;
 
 import br.com.elos.App;
@@ -50,6 +51,20 @@ public class AppConfig extends App {
 }
 
 ```
+
+**Configuração do arquivo `web.xml`:**
+
+```xml
+
+<context-param>
+    <param-name>elos</param-name>
+    <param-value>br.com.company.example.AppConfig</param-value>
+</context-param>
+
+
+```
+
+> Após concluir os dois passos de configuração acima o Elos está pronto para ser utilizado, para conhecer todas as funcionalidades existentes consulte a documentação completa na sessão abaixo.
 
 ## <a name="documentacao"></a>Documentação
 Para conhecer mais sobre as funcionalidades do Elos, criamos uma [documentação completa](https://github.com/jonathanarodr/elos/wiki) e objetiva para você em nosso **Wiki do GitHub**.
