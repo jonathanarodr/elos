@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="elos/src/main/java"/>
+	<classpathentry kind="lib" path="elos/bin/target/elos-1.0.jar"/>
+	<classpathentry kind="lib" path="elos/target/elos-1.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="elos/target/classes"/>
+</classpath>
