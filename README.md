@@ -1,5 +1,6 @@
 # Elos - Guia do Usuário
 ![Build status](https://travis-ci.org/jonathanarodr/elos.svg?branch=master)
+[![Ebert](https://ebertapp.io/github/jonathanarodr/elos.svg)](https://ebertapp.io/github/jonathanarodr/elos)
 
 - [Introdução](#introducao)
 - [Usando Elos com Maven](#instalacao)
