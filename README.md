@@ -1,5 +1,6 @@
 # Elos - Guia do Usuário
 ![Build status](https://travis-ci.org/jonathanarodr/elos.svg?branch=master)
+[![Ebert](https://ebertapp.io/github/jonathanarodr/elos.svg)](https://ebertapp.io/github/jonathanarodr/elos)
 
 - [Introdução](#introducao)
 - [Usando Elos com Maven](#instalacao)
@@ -67,4 +68,4 @@ public class AppConfig extends App {
 > Após concluir os dois passos de configuração acima o Elos está pronto para ser utilizado, para conhecer todas as funcionalidades existentes consulte a documentação completa na sessão abaixo.
 
 ## <a name="documentacao"></a>Documentação
-Para conhecer mais sobre as funcionalidades do Elos, criamos uma [documentação completa](https://github.com/jonathanarodr/elos/wiki) e objetiva para você em nosso **Wiki do GitHub**.
+Para conhecer mais sobre as funcionalidades do Elos, criamos uma documentação completa e objetiva para você em nosso [**Wiki**](https://github.com/jonathanarodr/elos/wiki).
