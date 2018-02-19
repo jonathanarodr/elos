@@ -17,9 +17,15 @@ import javax.ws.rs.Path;
 public class RouteInitializer implements ServletContainerInitializer {
     
     @Override
-    public void onStartup (Set<Class<?>> classes, ServletContext context) throws ServletException {	
+    public void onStartup (Set<Class<?>> classes, ServletContext context) throws ServletException {
+        String parameter = context.getInitParameter("elos");
+
+        if (parameter == null) {
+            return;
+        }
+
         try {
-            App app = App.getInstance(context.getInitParameter("elos"));
+            App app = App.getInstance(parameter);
             app.writeProperties();
             
             List<String> routes = new ArrayList<>();
