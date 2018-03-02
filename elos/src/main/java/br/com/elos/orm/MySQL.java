@@ -45,6 +45,10 @@ public class MySQL {
     protected Connection connection;
     private final Util util = new Util();
 
+    public int getRows() {
+        return this.rows;
+    }
+
     //comandos TCL
     public void close() {
         try {
